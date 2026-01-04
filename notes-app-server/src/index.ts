@@ -10,9 +10,10 @@ const app = express();
 
 app.use(express.json());
 app.use(cors({
-  origin: "https://frontendnotes-seven.vercel.app", // your deployed frontend URL
+  origin: "https://frontendnotes-seven.vercel.app",
   methods: ["GET", "POST", "PUT", "DELETE"],
 }));
+app.options("*", cors());
 
 // GET all notes
 app.get("/notes", async (req, res) => {
@@ -68,8 +69,6 @@ app.delete("/notes/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to delete note" });
   }
 });
-
-
 
 const port = process.env.PORT ? Number(process.env.PORT) : 5000;
 app.listen(port, () => {
