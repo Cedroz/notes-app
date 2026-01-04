@@ -13,7 +13,6 @@ app.use(cors({
   origin: "https://frontendnotes-seven.vercel.app",
   methods: ["GET", "POST", "PUT", "DELETE"],
 }));
-app.options("*", cors());
 
 // GET all notes
 app.get("/notes", async (req, res) => {
