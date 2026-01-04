@@ -1,0 +1,8 @@
+# Ignore generated artifacts
+node_modules/
+.env
+dist/
+**/*.js
+**/*.js.map
+**/*.d.ts
+**/*.d.ts.map
