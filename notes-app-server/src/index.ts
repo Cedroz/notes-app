@@ -9,7 +9,10 @@ const prisma = new PrismaClient();
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: "https://frontendnotes-seven.vercel.app", // your deployed frontend URL
+  methods: ["GET", "POST", "PUT", "DELETE"],
+}));
 
 // GET all notes
 app.get("/notes", async (req, res) => {
