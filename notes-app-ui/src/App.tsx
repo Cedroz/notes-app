@@ -30,7 +30,7 @@ const App = () => {
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(false);
   const [anonId, setAnonId] = useState<string>("");
-
+  
   // Initialize anonId and fetch notes
   useEffect(() => {
     const id = getAnonId();
@@ -41,6 +41,7 @@ const App = () => {
       try {
         const res = await fetch(`${BACKEND_URL}/notes`, {
           headers: { "X-ANON-ID": id },
+          cache: "no-store",
         });
         if (!res.ok) throw new Error("Failed to load notes");
         const data: Note[] = await res.json();
@@ -61,7 +62,7 @@ const App = () => {
     setTitle("");
     setContent("");
   };
-
+  
   // Select note for editing
   const handleNoteClick = (note: Note) => {
     setSelectedNote(note);
@@ -78,6 +79,7 @@ const App = () => {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-ANON-ID": anonId },
         body: JSON.stringify({ title, content }),
+        cache: "no-store",
       });
 
       if (!res.ok) throw new Error("Failed to create note");
@@ -99,6 +101,7 @@ const App = () => {
         method: "PUT",
         headers: { "Content-Type": "application/json", "X-ANON-ID": anonId },
         body: JSON.stringify({ title, content }),
+        cache: "no-store",
       });
 
       if (!res.ok) throw new Error("Failed to update note");
@@ -119,6 +122,7 @@ const App = () => {
       const res = await fetch(`${BACKEND_URL}/notes/${noteId}`, {
         method: "DELETE",
         headers: { "X-ANON-ID": anonId },
+        cache: "no-store",
       });
 
       if (res.status === 204) {
@@ -157,6 +161,7 @@ const App = () => {
                   setLoading(true);
                   const res = await fetch(`${BACKEND_URL}/notes`, {
                     headers: { "X-ANON-ID": newId },
+                    cache: "no-store",
                   });
 
                   if (!res.ok) throw new Error("Failed to load notes");
