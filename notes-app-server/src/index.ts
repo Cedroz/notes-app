@@ -42,6 +42,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   res.set("Pragma", "no-cache");
   res.set("Expires", "0");
   res.set("Surrogate-Control", "no-store");
+  res.set("CDN-Cache-Control", "no-store");
+  res.set("Vercel-CDN-Cache-Control", "no-store");
   next();
 });
 
@@ -136,5 +138,13 @@ app.delete("/notes/:id", async (req: CustomRequest, res: Response) => {
     res.status(500).json({ error: "Failed to delete note" });
   }
 });
+
+// Start server (for local development)
+const PORT = process.env.PORT || 5000;
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
 
 export default app;

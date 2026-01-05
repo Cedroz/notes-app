@@ -39,7 +39,8 @@ const App = () => {
     const fetchNotes = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${BACKEND_URL}/notes`, {
+        // Add cache-busting timestamp
+        const res = await fetch(`${BACKEND_URL}/notes?_=${Date.now()}`, {
           headers: { "X-ANON-ID": id },
           cache: "no-store",
         });
@@ -75,7 +76,7 @@ const App = () => {
     if (!anonId) return;
 
     try {
-      const res = await fetch(`${BACKEND_URL}/notes`, {
+      const res = await fetch(`${BACKEND_URL}/notes?_=${Date.now()}`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-ANON-ID": anonId },
         body: JSON.stringify({ title, content }),
@@ -97,7 +98,7 @@ const App = () => {
     if (!selectedNote || !anonId) return;
 
     try {
-      const res = await fetch(`${BACKEND_URL}/notes/${selectedNote.id}`, {
+      const res = await fetch(`${BACKEND_URL}/notes/${selectedNote.id}?_=${Date.now()}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", "X-ANON-ID": anonId },
         body: JSON.stringify({ title, content }),
@@ -119,7 +120,7 @@ const App = () => {
     if (!anonId) return;
 
     try {
-      const res = await fetch(`${BACKEND_URL}/notes/${noteId}`, {
+      const res = await fetch(`${BACKEND_URL}/notes/${noteId}?_=${Date.now()}`, {
         method: "DELETE",
         headers: { "X-ANON-ID": anonId },
         cache: "no-store",
@@ -159,7 +160,7 @@ const App = () => {
                   clearForm();
 
                   setLoading(true);
-                  const res = await fetch(`${BACKEND_URL}/notes`, {
+                  const res = await fetch(`${BACKEND_URL}/notes?_=${Date.now()}`, {
                     headers: { "X-ANON-ID": newId },
                     cache: "no-store",
                   });
