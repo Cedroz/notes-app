@@ -145,9 +145,30 @@ const App = () => {
             <small className="muted">Guest: {anonId}</small>
             <button
               className="btn-reset"
-              onClick={() => {
-                localStorage.removeItem("anon_id");
-                window.location.reload();
+              onClick={async () => {
+                try {
+                  localStorage.removeItem("anon_id");
+
+                  const newId = getAnonId();
+                  setAnonId(newId);
+                  setNotes([]);
+                  clearForm();
+
+                  setLoading(true);
+                  const res = await fetch(`${BACKEND_URL}/notes`, {
+                    headers: { "X-ANON-ID": newId },
+                  });
+
+                  if (!res.ok) throw new Error("Failed to load notes");
+
+                  const data: Note[] = await res.json();
+                  setNotes(data);
+                } catch (err) {
+                  console.error(err);
+                  setNotes([]);
+                } finally {
+                  setLoading(false);
+                }
               }}
               title="Reset guest ID and start fresh"
             >
