@@ -18,3 +18,5 @@ dist/
 # Logs
 npm-debug.log
 yarn-debug.log
+.vercel
+.env*.local
