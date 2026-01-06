@@ -33,25 +33,22 @@ app.use(
     origin: process.env.FRONTEND_ORIGIN || "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "X-ANON-ID"],
+    credentials: true,
   })
 );
 
-// Cache Control Middleware
+// Disable all caching
 app.use((req: Request, res: Response, next: NextFunction) => {
-  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, private, max-age=0");
   res.set("Pragma", "no-cache");
   res.set("Expires", "0");
   res.set("Surrogate-Control", "no-store");
-  res.set("CDN-Cache-Control", "no-store");
-  res.set("Vercel-CDN-Cache-Control", "no-store");
   next();
 });
 
 // Anonymous ID Middleware
 app.use((req: CustomRequest, res: Response, next: NextFunction) => {
   const anonId = req.header("X-ANON-ID");
-
-  res.set("Vary", "X-ANON-ID");
 
   if (anonId) {
     req.anonId = anonId;
@@ -63,12 +60,15 @@ app.use((req: CustomRequest, res: Response, next: NextFunction) => {
 app.get("/notes", async (req: CustomRequest, res: Response) => {
   try {
     const anonId = req.anonId;
-    if (!anonId) return res.json([]);
+    if (!anonId) {
+      return res.json([]);
+    }
 
     const notes = await prisma.note.findMany({
       where: { anonId },
       orderBy: { createdAt: "desc" },
     });
+    
     res.json(notes);
   } catch (err) {
     console.error("GET /notes error:", err);
@@ -80,11 +80,18 @@ app.get("/notes", async (req: CustomRequest, res: Response) => {
 app.post("/notes", async (req: CustomRequest, res: Response) => {
   try {
     const anonId = req.anonId;
-    if (!anonId) return res.status(400).json({ error: "Missing anonymous ID" });
+    if (!anonId) {
+      return res.status(400).json({ error: "Missing anonymous ID" });
+    }
 
     const { title, content } = req.body;
+    
+    if (!title) {
+      return res.status(400).json({ error: "Title is required" });
+    }
+
     const note = await prisma.note.create({
-      data: { title, content, anonId },
+      data: { title, content: content || "", anonId },
     });
 
     res.status(201).json(note);
@@ -98,20 +105,32 @@ app.post("/notes", async (req: CustomRequest, res: Response) => {
 app.put("/notes/:id", async (req: CustomRequest, res: Response) => {
   try {
     const anonId = req.anonId;
-    if (!anonId) return res.status(400).json({ error: "Missing anonymous ID" });
+    if (!anonId) {
+      return res.status(400).json({ error: "Missing anonymous ID" });
+    }
 
     const id = Number(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid note ID" });
+    }
+
     const { title, content } = req.body;
 
-    const updated = await prisma.note.updateMany({
+    // First check if note exists and belongs to user
+    const existingNote = await prisma.note.findFirst({
       where: { id, anonId },
-      data: { title, content },
     });
 
-    if (updated.count === 0) return res.status(404).json({ error: "Note not found" });
+    if (!existingNote) {
+      return res.status(404).json({ error: "Note not found" });
+    }
 
-    const note = await prisma.note.findFirst({ where: { id, anonId } });
-    res.json(note);
+    const updatedNote = await prisma.note.update({
+      where: { id },
+      data: { title, content: content || "" },
+    });
+
+    res.json(updatedNote);
   } catch (err) {
     console.error("PUT /notes/:id error:", err);
     res.status(500).json({ error: "Failed to update note" });
@@ -122,21 +141,38 @@ app.put("/notes/:id", async (req: CustomRequest, res: Response) => {
 app.delete("/notes/:id", async (req: CustomRequest, res: Response) => {
   try {
     const anonId = req.anonId;
-    if (!anonId) return res.status(400).json({ error: "Missing anonymous ID" });
+    if (!anonId) {
+      return res.status(400).json({ error: "Missing anonymous ID" });
+    }
 
     const id = Number(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid note ID" });
+    }
 
-    const deleted = await prisma.note.deleteMany({
+    // Check if note exists and belongs to user
+    const existingNote = await prisma.note.findFirst({
       where: { id, anonId },
     });
 
-    if (deleted.count === 0) return res.status(404).json({ error: "Note not found" });
+    if (!existingNote) {
+      return res.status(404).json({ error: "Note not found" });
+    }
+
+    await prisma.note.delete({
+      where: { id },
+    });
 
     res.status(204).send();
   } catch (err) {
     console.error("DELETE /notes/:id error:", err);
     res.status(500).json({ error: "Failed to delete note" });
   }
+});
+
+// Health check
+app.get("/", (req: Request, res: Response) => {
+  res.json({ status: "ok", message: "Notes API is running" });
 });
 
 // Start server (for local development)
