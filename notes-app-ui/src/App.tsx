@@ -183,6 +183,9 @@ const App = () => {
           </div>
         </div>
         <p className="subtitle">Manage your notes below</p>
+        <p className="info-note">
+          <small>Note: This app uses Supabase free tier which may pause after inactivity. If you experience connection issues, please wait a moment and try again.</small>
+        </p>
       </header>
 
       <aside className="sidebar">

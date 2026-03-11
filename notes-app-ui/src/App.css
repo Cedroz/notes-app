@@ -48,6 +48,21 @@ body {
   font-size: 13px;
 }
 
+.app-header .info-note {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  background: #f0f9ff;
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  color: #0c4a6e;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.app-header .info-note small {
+  color: #0c4a6e;
+}
+
 /* Layout: sidebar + main */
 @media (min-width: 760px) {
   .app-container {
