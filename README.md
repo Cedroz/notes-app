@@ -2,8 +2,6 @@
 
 A full-stack, serverless note-taking application built with **React**, **TypeScript**, **Express.js**, and **Prisma**, designed for a personalized note-taking experience **without requiring authentication**.
 
-**Live Demo:** [https://frontendnotes-seven.vercel.app/](https://frontendnotes-seven.vercel.app/)
-
 ---
 
 ## Features
